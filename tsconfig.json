@@ -1,10 +1,26 @@
 {
-  "extends": "./tsconfig.build.json",
   "compilerOptions": {
-    "composite": false,
-    "rootDir": "."
+    "allowSyntheticDefaultImports": true,
+    "allowUnreachableCode": false,
+    "allowUnusedLabels": false,
+
+    // specifically disable declarations for the plugin
+    // see reasoning in typescript-eslint's packages/eslint-plugin/rules.d.ts
+    "declaration": false,
+    "declarationMap": false,
+
+    "esModuleInterop": true,
+    "lib": ["ES2021"],
+    "module": "Node16",
+    "moduleResolution": "node16",
+    "noImplicitReturns": true,
+    "outDir": "./dist",
+    "pretty": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "sourceMap": true,
+    "strict": true,
+    "target": "ES2021"
   },
-  "include": ["src", "tests"],
-  "exclude": ["tests/fixtures"],
-  "references": [{ "path": "../utils/tsconfig.build.json" }]
+  "include": ["src"]
 }

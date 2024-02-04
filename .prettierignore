@@ -1,0 +1,5 @@
+.yarn
+coverage
+dist
+CHANGELOG.md
+CONTRIBUTORS.md

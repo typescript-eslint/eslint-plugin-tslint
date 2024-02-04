@@ -1,0 +1,70 @@
+{
+  enabledManagers: ['github-actions', 'npm'],
+  ignoreDeps: [
+    // AJV is out-of-date, but it's intentionally synced with ESLint - https://github.com/eslint/eslint/blob/ad9dd6a933fd098a0d99c6a9aa059850535c23ee/package.json#L70
+    'ajv',
+    // globby is ESM so we can't go any higher right now
+    'globby',
+    // this dep is now ESM only
+    'execa',
+  ],
+  internalChecksFilter: 'strict',
+  labels: ['dependencies'],
+  dependencyDashboard: true,
+  dependencyDashboardLabels: ['dependencies', 'repo maintenance'],
+  major: {
+    // most majors will require some manual effort to upgrade to, so we don't want to create
+    // PRs automatically or else we'll just spam ourselves.
+    dependencyDashboardApproval: true,
+  },
+  // by default renovate will auto-rebase whenever the dep pranch falls behind main.
+  // this is annoying as it spams notifications and creates unnecessary action runs.
+  // instead only auto-rebase when conflicted, and we can trigger a manual rebase if required.
+  rebaseWhen: 'conflicted',
+  packageRules: [
+    // automerge everything but major updates
+    {
+      matchUpdateTypes: ['minor', 'patch', 'pin', 'digest'],
+      automerge: true,
+      automergeStrategy: 'squash',
+    },
+
+    // label PRs appropriately
+    {
+      matchManagers: ['npm'],
+      addLabels: ['javascript'],
+    },
+    {
+      matchManagers: ['github-actions'],
+      addLabels: ['github-actions'],
+    },
+
+    // batch package sets together
+    {
+      extends: ['packages:react'],
+      groupName: 'react',
+    },
+    {
+      extends: ['monorepo:docusaurus'],
+      groupName: 'docusaurus',
+    },
+    {
+      extends: ['monorepo:nrwl'],
+      groupName: 'nx',
+    },
+    {
+      matchPackagePrefixes: ['@babel', 'babel-'],
+      groupName: 'babel',
+    },
+    {
+      matchPackageNames: ['ts-jest', 'pretty-format'],
+      matchPackagePrefixes: ['@types/jest', 'jest', '@jest'],
+      groupName: 'jest',
+    },
+  ],
+  postUpdateOptions: [
+    // run yarn dedupe to cleanup the lockfile after updates
+    'yarnDedupeHighest',
+  ],
+  stabilityDays: 3,
+}

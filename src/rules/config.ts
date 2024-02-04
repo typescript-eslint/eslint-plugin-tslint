@@ -19,6 +19,7 @@ function memoize<T extends (...args: never[]) => unknown>(
     const key = resolver(...(args as Parameters<T>));
 
     if (cache.has(key)) {
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       return cache.get(key)!;
     }
     const result = func(...args);
@@ -29,8 +30,8 @@ function memoize<T extends (...args: never[]) => unknown>(
 }
 
 // note - cannot migrate this to an import statement because it will make TSC copy the package.json to the dist folder
-// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-const version: string = require('../../package.json');
+// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-var-requires
+const { version } = require('../../package.json') as { version: string };
 
 const createRule = ESLintUtils.RuleCreator(
   () =>

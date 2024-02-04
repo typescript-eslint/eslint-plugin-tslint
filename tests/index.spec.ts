@@ -1,9 +1,7 @@
 import * as parser from '@typescript-eslint/parser';
 import { TSESLint } from '@typescript-eslint/utils';
 import { readFileSync } from 'fs';
-import path = require('path');
-
-import type { ClassicConfig } from '@typescript-eslint/utils/ts-eslint';
+import path from 'path';
 
 import type { Options } from '../src/rules/config';
 import rule from '../src/rules/config';
@@ -140,6 +138,7 @@ ruleTester.run('tslint/config', rule, {
       parserOptions: {
         project: TEST_PROJECT_PATH,
       },
+      output: `const a: string = 1; const sum = 1 + '2'; `,
       options: [
         {
           rulesDirectory: [
@@ -168,34 +167,45 @@ ruleTester.run('tslint/config', rule, {
 
 if (process.env.TYPESCRIPT_ESLINT_EXPERIMENTAL_TSSERVER !== 'true') {
   describe('tslint/error', () => {
-    function testOutput(code: string, config: ClassicConfig.Config): void {
+    function setupLinter(): TSESLint.Linter {
       const linter = new TSESLint.Linter();
+
       linter.defineRule('tslint/config', rule);
       linter.defineParser('@typescript-eslint/parser', parser);
 
-      expect(() => linter.verify(code, config)).toThrow(
-        'You have used a rule which requires parserServices to be generated. You must therefore provide a value for the "parserOptions.project" property for @typescript-eslint/parser.',
-      );
+      return linter;
     }
 
     it('should error on missing project', () => {
-      testOutput('foo;', {
-        rules: {
-          'tslint/config': [2, tslintRulesConfig],
-        },
-        parser: '@typescript-eslint/parser',
-      });
+      const linter = setupLinter();
+
+      expect(() =>
+        linter.verify('foo;', {
+          rules: {
+            'tslint/config': [2, tslintRulesConfig],
+          },
+          parser: '@typescript-eslint/parser',
+        }),
+      ).toThrow(
+        'You have used a rule which requires parserServices to be generated. You must therefore provide a value for the "parserOptions.project" property for @typescript-eslint/parser.',
+      );
     });
 
     it('should error on default parser', () => {
-      testOutput('foo;', {
-        parserOptions: {
-          project: TEST_PROJECT_PATH,
-        },
-        rules: {
-          'tslint/config': [2, tslintRulesConfig],
-        },
-      });
+      const linter = setupLinter();
+
+      expect(() =>
+        linter.verify('foo;', {
+          parserOptions: {
+            project: TEST_PROJECT_PATH,
+          },
+          rules: {
+            'tslint/config': [2, tslintRulesConfig],
+          },
+        }),
+      ).toThrow(
+        'You have used a rule which requires parserServices to be generated. You must therefore provide a value for the "parserOptions.project" property for @typescript-eslint/parser.',
+      );
     });
 
     it('should not crash if there are no tslint rules specified', () => {
